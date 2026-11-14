@@ -105,6 +105,9 @@ async function main() {
   const text = await response.text();
   assert(Buffer.byteLength(text, 'utf8') < 5 * 1024 * 1024, 'Слишком большой ответ сборщика');
   const fresh = validate(JSON.parse(text));
+  // 14.11.2026: ошибка в таблице дала «успешную» пустую выдачу и очистила сайт.
+  // Пустой каталог никогда не публикуем: прежний файл остаётся, запуск помечается ошибкой.
+  assert(fresh.count > 0, 'Сборщик вернул 0 компаний: вероятна ошибка в таблице, catalog.json не изменён');
 
   const endpoint = `repos/${REPOSITORY}/contents/catalog.json`;
   const stored = github('GET', `${endpoint}?ref=${BRANCH}`);
